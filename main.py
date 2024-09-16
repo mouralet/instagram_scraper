@@ -11,7 +11,7 @@ instagram.load_session_from_file('your_username')
 
 dados = []
 
-csvfile = open('entrego.csv', 'a', encoding='utf-8')
+csvfile = open('file.csv', 'a', encoding='utf-8')
 writer = csv.writer(csvfile)
 writer.writerow(['numero_post', 'username', 'likes', 'views', 'data',
                 'link_post', 'imagem', 'descricao_post', 'comentarios'])
