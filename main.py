@@ -4,61 +4,53 @@ import time
 import threading
 from datetime import datetime
 
-limit_date = datetime(2023, 5, 1)
+data_limite = datetime(2024, 1, 1)
+
 instagram = instaloader.Instaloader()
-instagram.load_session_from_file('login_instagram')  # (login)
-data_list = []
-csvfile = open('arquivo.csv', 'a', encoding='utf-8')
+instagram.load_session_from_file('your_username')
+
+dados = []
+
+csvfile = open('entrego.csv', 'a', encoding='utf-8')
 writer = csv.writer(csvfile)
-writer.writerow(['post_number', 'username', 'likes', 'views', 'date',
-                'post_link', 'image', 'post_description', 'comments'])
+writer.writerow(['numero_post', 'username', 'likes', 'views', 'data',
+                'link_post', 'imagem', 'descricao_post', 'comentarios'])
 
 def get_posts_by_username(username):
-    post_number = 0 
+    numero_post = 0
     for post in instaloader.Profile.from_username(instagram.context, username).get_posts():
         time.sleep(10)
-        post_number += 1  
-        print('Post: ' + "https://www.instagram.com/p/" + post.shortcode)
-        print(post_number)
-        
-        if post.date < limit_date and post_number > 4:
-            print(
-                "Data do post é menor que 01/01/2023 e número de post maior que 4. Parando a coleta.")
+        numero_post += 1
+        if post.date > data_limite and numero_post > 4:
             break
-        
-        substring = "keyword"
+        substring = "the_keyword_you_want_to_collect_info"
         if post.caption is not None and substring in post.caption.lower():
-            comments = []
+            comentarios = []
             for comment in post.get_comments():
-                comments.append(comment.text)
-            
-            formatted_description = post.caption.replace(
-                '\n', ' ') if post.caption else ''
-            data = {
+                comentarios.append(comment.text)
+            descricao_formatada = post.caption.replace('\n', ' ') if post.caption else ''
+            dado = {
                 "username": post.owner_username,
                 "likes": post.likes,
                 "views": post.video_view_count,
-                "date": post.date.strftime("%m/%d/%Y"),
-                "post_link": "https://www.instagram.com/p/" + post.shortcode,
-                "image": post.url,
-                "post_description": formatted_description,
-                "comments": comments,
-                "comments_count": post.comments
+                "data": post.date.strftime("%m/%d/%Y"),
+                "link_post": post.shortcode,
+                "imagem": post.url,
+                "descricao_post": descricao_formatada,
+                "comentarios": comentarios,
+                "contagem_comentarios": post.comments
             }
-
-            formatted_comments = [comment.replace(
-                '\n', ' ') for comment in comments]
+            comentarios_formatados = [comentario.replace('\n', ' ') for comentario in comentarios]
             with lock:
-                for comment in formatted_comments:
-                    writer.writerow([post_number, data['username'], data['likes'], data['views'], data['date'],
-                                    data['post_link'], data['image'], data['post_description'], comment])
-        print('Finished user: ' + username)
-    lock = threading.Lock()
+                for comentario in comentarios_formatados:
+                    writer.writerow([numero_post, dado['username'], dado['likes'], dado['views'], dado['data'],
+                                     dado['link_post'], dado['imagem'], dado['descricao_post'], comentario])
+    print('Finalizado usuário: ' + username)
 
-usernames = ["usarname1", "username2", "username3"]
+lock = threading.Lock()
+usernames = ["the_username_you_want_to_collect_info"]
 
 threads = []
-
 for username in usernames:
     thread = threading.Thread(target=get_posts_by_username, args=[username])
     threads.append(thread)
@@ -71,6 +63,6 @@ for thread in threads:
 
 for thread in threads:
     thread.join()
-csvfile.close()
 
-print('Completed!')
+csvfile.close()
+print('Finalizado!')
